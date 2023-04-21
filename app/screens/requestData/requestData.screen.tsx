@@ -75,6 +75,7 @@ export const RequestDataScreen = ({route, navigation}) => {
         <View style={requestDataScreenStyle.componentContainer}>
           {values.map(value => (
             <TouchableOpacity
+              key={value}
               style={requestDataScreenStyle.component}
               onPress={() =>
                 navigation.navigate('Date', {

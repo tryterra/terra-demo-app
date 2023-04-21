@@ -4,7 +4,6 @@ import {DataScreenStyle} from './data.style';
 import BottomSheet from './BottomSheet';
 import {DateScreenStyle} from '../date/date.style';
 import * as WebBrowser from 'expo-web-browser';
-import {getWidgetAsync} from '../login/login.screen';
 import {Backbutton} from '../requestData/requestData.screen';
 import {utilsStyle} from '../../utils.style';
 import {api_key} from '../../../env';
@@ -25,9 +24,10 @@ import {
   getMenstruation,
   getNutrition,
   getSleep,
-  getUserId,
 } from 'terra-react';
+import {getWidgetAsync} from '../onboarding/onboarding.screen';
 
+// A custom component that takes two props, name and data, and renders them as two Text components in a row.
 // @ts-ignore
 const Row = props => {
   return (
@@ -37,6 +37,8 @@ const Row = props => {
     </View>
   );
 };
+
+/// A custom component that renders three buttons for connecting to different health data sources.
 const ConnectionPopUp = (props: {cancelOnPress: any}) => {
   const [url, setUrl] = useState('');
   const _handlePressButtonAsync = async () => {
@@ -73,6 +75,9 @@ const ConnectionPopUp = (props: {cancelOnPress: any}) => {
     </View>
   );
 };
+
+/// Performing mobile SDKs data request for APPLE GOOGKE SAMSUNG FREESTYLE_LIBRE. Detail check:
+/// https://docs.tryterra.co/reference/reference-react-native-sdk.
 // @ts-ignore
 const native_data = async props => {
   var response: DataMessage;
@@ -133,6 +138,9 @@ const native_data = async props => {
   });
   props.setPayloadMethod(result_payload);
 };
+
+/// Performing request through directly querying Terra API EndPoint. Detail example check:
+/// https://docs.tryterra.co/reference/get-activity-data
 // @ts-ignore
 const api_request_data = async props => {
   try {
@@ -169,7 +177,8 @@ const api_request_data = async props => {
   }
 };
 
-// @ts-ignore
+/// This component provides functionality for the user to select a health data type,
+/// connect to a health data source, and view health data within a specified date range.
 // @ts-ignore
 export const DataScreen = ({route, navigation}) => {
   const {
@@ -198,6 +207,9 @@ export const DataScreen = ({route, navigation}) => {
   ) => {
     setToDate(selectedDate);
   };
+
+  /// request that checks if the resource variable is equal to APPLE, GOOGLE, or SAMSUNG.
+  /// If it is, the function calls native_data with some arguments, otherwise it calls api_request_data.
   const request = () => {
     if (resource == 'APPLE' || resource == 'GOOGLE' || resource == 'SAMSUNG') {
       let connection;
@@ -240,7 +252,6 @@ export const DataScreen = ({route, navigation}) => {
   var entries: [string, string][] = payload;
 
   // @ts-ignore
-  // @ts-ignore
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#F5F5F5'}}>
       <View>
@@ -280,6 +291,7 @@ export const DataScreen = ({route, navigation}) => {
             if (index <= 10) {
               return (
                 <Row
+                  key={entry}
                   style={
                     index % 2 == 0
                       ? DataScreenStyle.whiteRow
