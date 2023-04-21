@@ -8,6 +8,9 @@ import {
 } from 'react-native';
 import {DataScreenStyle} from './data.style';
 
+/// This is a React Native component that renders a modal with a draggable and dismissible popup.
+/// The popup can be dragged up and down on the screen using the PanResponder API,
+/// and can be dismissed by swiping down or by clicking outside the popup.
 // @ts-ignore
 export default props => {
   const screenHeight = Dimensions.get('screen').height;

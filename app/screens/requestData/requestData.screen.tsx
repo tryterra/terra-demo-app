@@ -1,17 +1,14 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  GestureResponderEvent,
-} from 'react-native';
+import {SafeAreaView, View, Text, TouchableOpacity, Image} from 'react-native';
 import {requestDataScreenStyle} from './requestData.style';
 import {utilsStyle} from '../../utils.style';
-// @ts-ignore
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {Backbutton} from '../../utils.component';
 
+/**
+Renders an icon based on the provided value.
+@param {string} value - The value to determine the icon to display.
+@return {JSX.Element} - The icon component.
+ */
 // @ts-ignore
 const ImageIcon = ({value}) => {
   var icon =
@@ -40,17 +37,13 @@ const ImageIcon = ({value}) => {
   );
 };
 
-export const Backbutton = (props: {
-  navigateTo: ((event: GestureResponderEvent) => void) | undefined;
-}) => (
-  <TouchableOpacity style={utilsStyle.backButton} onPress={props.navigateTo}>
-    <Ionicons
-      name="arrow-back-sharp"
-      size={25}
-      style={utilsStyle.backButton.backArrow}
-    />
-  </TouchableOpacity>
-);
+/**
+Renders the request data screen.
+@param {Object} props - The props to pass to the component.
+@param {Object} props.route - The route object containing information about the current screen.
+@param {Object} props.navigation - The navigation object used for screen navigation.
+@return {JSX.Element} - The request data screen component.
+*/
 // @ts-ignore
 export const RequestDataScreen = ({route, navigation}) => {
   const values: string[] = [

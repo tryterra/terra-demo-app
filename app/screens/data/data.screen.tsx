@@ -76,7 +76,7 @@ const ConnectionPopUp = (props: {cancelOnPress: any}) => {
   );
 };
 
-/// Performing mobile SDKs data request for APPLE GOOGKE SAMSUNG FREESTYLE_LIBRE. Detail check:
+/// Performing mobile SDKs data request for APPLE GOOGLE SAMSUNG FREESTYLE_LIBRE. Detail check:
 /// https://docs.tryterra.co/reference/reference-react-native-sdk.
 // @ts-ignore
 const native_data = async props => {
