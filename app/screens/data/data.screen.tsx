@@ -126,16 +126,23 @@ const native_data = async props => {
     );
   }
   // @ts-ignore
-  const health_key = Object.keys(response.data['data'][0]);
   var result_payload: [string, JSONValue][] = [];
-  health_key.map(key => {
-    // @ts-ignore
-    var first_element = getLeafElement(response.data['data'][0][key]);
-    if (first_element == null || first_element == undefined) {
-      first_element = 'empty';
-    }
-    result_payload.push([key, first_element]);
-  });
+  try {
+    const health_key = Object.keys(response.data['data'][0]);
+    health_key.map(key => {
+      // @ts-ignore
+      var first_element = getLeafElement(response.data['data'][0][key]);
+      if (first_element == null || first_element == undefined) {
+        first_element = 'empty';
+      }
+      result_payload.push([key, first_element]);
+    });
+  } catch (error) {
+    console.error(error);
+    console.error(response);
+    result_payload.push(['data', 'too much data requested']);
+    result_payload.push(['date', 'consider requesting 1 day of data instead']);
+  }
   props.setPayloadMethod(result_payload);
 };
 
@@ -189,7 +196,7 @@ export const DataScreen = ({route, navigation}) => {
     reference_id,
     resource,
   } = route.params;
-  const [openModal, setopenModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const [fromDate, setFromDate] = useState(new Date(previousFromDate));
   const [toDate, setToDate] = useState(new Date(previousToDate));
   const [fromShow, setFromShow] = useState(false);
@@ -317,7 +324,7 @@ export const DataScreen = ({route, navigation}) => {
             textStyle={DataScreenStyle.connectButton.text}
             title="Connect"
             onPress={() => {
-              setopenModal(true);
+              setOpenModal(true);
             }}
           />
           <AppButtonWithIcon
@@ -333,11 +340,11 @@ export const DataScreen = ({route, navigation}) => {
         {openModal && (
           <BottomSheet
             onDismiss={() => {
-              setopenModal(false);
+              setOpenModal(false);
             }}>
             <ConnectionPopUp
               cancelOnPress={() => {
-                setopenModal(false);
+                setOpenModal(false);
               }}
             />
           </BottomSheet>
