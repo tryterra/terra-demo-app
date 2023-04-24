@@ -32,7 +32,7 @@ Specifically, set the URL scheme to "terraficapp" and the identifier to your pro
 Open your Xcode project and select your project in the project navigator.
 Select your target from the targets list.
 Click on the Info tab.
-Check if "Privacy - Health Share Usage Description" and "Privacy - Health Record Usage Description" are there in the list under the "Custom iOS Target Properties" section.
+- Check if "Privacy - Health Share Usage Description" and "Privacy - Health Record Usage Description" are there in the list under the "Custom iOS Target Properties" section.
 Check if the capability for clinical health records and background delivery in Xcode under the HealthKit Capability is enabled. (https://developer.apple.com/documentation/xcode/adding-capabilities-to-your-app)
 Refer to this link to understand why this setup is necessary: https://docs.tryterra.co/docs/react-native-project
 
