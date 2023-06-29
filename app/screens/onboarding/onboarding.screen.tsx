@@ -33,6 +33,7 @@ export const getWidgetAsync = async (props: {onSuccess: any}) => {
         }),
       },
     );
+    
     const json = await response.json();
     props.onSuccess(json.url);
   } catch (error) {
