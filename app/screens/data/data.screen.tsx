@@ -1,5 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {SafeAreaView, View, Alert, Text, TouchableOpacity} from 'react-native';
+import React, {useEffect, useState, useRef} from 'react';
+import {
+  SafeAreaView,
+  View,
+  Alert,
+  Text,
+  TouchableOpacity,
+  ViewStyle,
+} from 'react-native';
 import {DataScreenStyle} from './data.style';
 import BottomSheet from './BottomSheet';
 import {DateScreenStyle} from '../date/date.style';
@@ -25,11 +32,18 @@ import {
   getNutrition,
   getSleep,
 } from 'terra-react';
-import {getWidgetAsync} from '../onboarding/onboarding.screen';
+import {getRequestData, getWidgetAsync} from '../../helpers/helpers';
+import {RootStackParamList} from '../../app.navigator';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {DateTimePickerEvent} from '@react-native-community/datetimepicker';
 
 // A custom component that takes two props, name and data, and renders them as two Text components in a row.
-// @ts-ignore
-const Row = props => {
+interface rowProps {
+  style: ViewStyle;
+  name: string;
+  data: JSONValue;
+}
+const Row = (props: rowProps) => {
   return (
     <View style={[props.style]}>
       <Text>{props.name}</Text>
@@ -40,15 +54,10 @@ const Row = props => {
 
 /// A custom component that renders three buttons for connecting to different health data sources.
 const ConnectionPopUp = (props: {cancelOnPress: any}) => {
-  const [url, setUrl] = useState('');
+  const url = useRef('');
   const _handlePressButtonAsync = async () => {
-    await getWidgetAsync({onSuccess: setUrl});
-    await WebBrowser.openBrowserAsync(url);
-    // setResult(result);
+    url.current = await getWidgetAsync();
   };
-  useEffect(() => {
-    getWidgetAsync({onSuccess: setUrl});
-  }, []);
   return (
     <View>
       <View style={DataScreenStyle.sliderIndicatorRow}>
@@ -78,116 +87,67 @@ const ConnectionPopUp = (props: {cancelOnPress: any}) => {
 
 /// Performing mobile SDKs data request for APPLE GOOGLE SAMSUNG FREESTYLE_LIBRE. Detail check:
 /// https://docs.tryterra.co/reference/reference-react-native-sdk.
-// @ts-ignore
-const native_data = async props => {
-  var response: DataMessage;
-  if (props.requestedDataType.toLowerCase() == 'body') {
-    response = await getBody(
-      props.connection,
-      props.fromDate,
-      props.toDate,
-      false,
-      false,
-    );
-  } else if (props.requestedDataType.toLowerCase() == 'daily') {
-    response = await getDaily(
-      props.connection,
-      props.fromDate,
-      props.toDate,
-      false,
-    );
-  } else if (props.requestedDataType.toLowerCase() == 'activity') {
-    response = await getActivity(
-      props.connection,
-      props.fromDate,
-      props.toDate,
-      false,
-    );
-  } else if (props.requestedDataType.toLowerCase() == 'menstruation') {
-    response = await getMenstruation(
-      props.connection,
-      props.fromDate,
-      props.toDate,
-      false,
-    );
-  } else if (props.requestedDataType.toLowerCase() == 'nutrition') {
-    response = await getNutrition(
-      props.connection,
-      props.fromDate,
-      props.toDate,
-      false,
-    );
-  } else if (props.requestedDataType.toLowerCase() == 'sleep') {
-    response = await getSleep(
-      props.connection,
-      props.fromDate,
-      props.toDate,
-      false,
-    );
+interface nativeDataProps {
+  requestedDataType: string;
+  connection: Connections | undefined;
+  fromDate: Date;
+  toDate: Date;
+  setPayloadMethod: React.Dispatch<React.SetStateAction<[string, JSONValue][]>>;
+}
+const nativeData = async (props: nativeDataProps) => {
+  let response: DataMessage;
+  const {requestedDataType, connection, fromDate, toDate, setPayloadMethod} =
+    props;
+  connection ??
+    (() => {
+      throw new Error("Connection can't be undefined");
+    })();
+  if (requestedDataType.toLowerCase() === 'body') {
+    response = await getBody(connection, fromDate, toDate, false, false);
+  } else if (requestedDataType.toLowerCase() === 'daily') {
+    response = await getDaily(connection, fromDate, toDate, false);
+  } else if (requestedDataType.toLowerCase() === 'activity') {
+    response = await getActivity(connection, fromDate, toDate, false);
+  } else if (requestedDataType.toLowerCase() === 'menstruation') {
+    response = await getMenstruation(connection, fromDate, toDate, false);
+  } else if (requestedDataType.toLowerCase() === 'nutrition') {
+    response = await getNutrition(connection, fromDate, toDate, false);
+  } else {
+    console.log('sleep data', fromDate, toDate);
+    response = await getSleep(connection, fromDate, toDate, false);
   }
-  // @ts-ignore
+
   var result_payload: [string, JSONValue][] = [];
   try {
-    const health_key = Object.keys(response.data['data'][0]);
+    // @ts-ignore
+    let data = response.data['data'];
+    if (data.length == 0) {
+      throw console.error();
+    }
+    console.log('successfully retrieved data');
+
+    const health_key = Object.keys(data[0]);
     health_key.map(key => {
-      // @ts-ignore
-      var first_element = getLeafElement(response.data['data'][0][key]);
+      var first_element = getLeafElement(data[0][key]);
       if (first_element == null || first_element == undefined) {
         first_element = 'empty';
       }
       result_payload.push([key, first_element]);
     });
   } catch (error) {
-    console.error(error);
-    console.error(response);
-    result_payload.push(['data', 'too much data requested']);
-    result_payload.push(['date', 'consider requesting 1 day of data instead']);
+    console.error(response.error, response.data);
+    props.setPayloadMethod([
+      ['data', 'too much data requested'],
+      ['date', 'consider requesting 1 day of data instead'],
+    ]);
   }
   props.setPayloadMethod(result_payload);
 };
 
-/// Performing request through directly querying Terra API EndPoint. Detail example check:
-/// https://docs.tryterra.co/reference/get-activity-data
-// @ts-ignore
-const api_request_data = async props => {
-  try {
-    const response = await fetch(
-      `https://api.tryterra.co/v2/${props.requestedDataType.toLowerCase()}?user_id=${
-        props.user_id
-      }&start_date=${props.fromDate}&end_date=${
-        props.toDate
-      }&to_webhook=false&with_samples=false`,
-      {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'dev-id': 'testingTerra',
-          'x-api-key': api_key,
-        },
-      },
-    );
-    const json = await response.json();
-    const health_key = Object.keys(json.data[0]);
-    var result_payload: [string, JSONValue][] = [];
-    health_key.map(key => {
-      var first_element = getLeafElement(json.data[0][key]);
-      if (first_element == null || first_element == undefined) {
-        first_element = 'empty';
-      }
-      result_payload.push([key, first_element]);
-    });
-    props.setPayloadMethod(result_payload);
-
-    return json;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 /// This component provides functionality for the user to select a health data type,
 /// connect to a health data source, and view health data within a specified date range.
-// @ts-ignore
-export const DataScreen = ({route, navigation}) => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Data'>;
+export const DataScreen = ({route, navigation}: Props) => {
   const {
     previousFromDate,
     previousToDate,
@@ -196,28 +156,24 @@ export const DataScreen = ({route, navigation}) => {
     reference_id,
     resource,
   } = route.params;
+
+  const fromDate = useRef(new Date(previousFromDate));
+  const toDate = useRef(new Date(previousFromDate));
   const [openModal, setOpenModal] = useState(false);
-  const [fromDate, setFromDate] = useState(new Date(previousFromDate));
-  const [toDate, setToDate] = useState(new Date(previousToDate));
   const [fromShow, setFromShow] = useState(false);
   const [toShow, setToShow] = useState(false);
-  const [payload, setPayload] = useState([]);
-  const onChangeFromDate = (
-    event: any,
-    selectedDate: React.SetStateAction<Date>,
-  ) => {
-    setFromDate(selectedDate);
+  const [payload, setPayload] = useState<[string, JSONValue][]>([]);
+
+  const onChangeFromDate = (event: DateTimePickerEvent, date?: Date) => {
+    date && (fromDate.current = date);
   };
-  const onChangeToDate = (
-    event: any,
-    selectedDate: React.SetStateAction<Date>,
-  ) => {
-    setToDate(selectedDate);
+  const onChangeToDate = (event: DateTimePickerEvent, date?: Date) => {
+    date && (toDate.current = date);
   };
 
   /// request that checks if the resource variable is equal to APPLE, GOOGLE, or SAMSUNG.
   /// If it is, the function calls native_data with some arguments, otherwise it calls api_request_data.
-  const request = () => {
+  const request = async () => {
     if (resource == 'APPLE' || resource == 'GOOGLE' || resource == 'SAMSUNG') {
       let connection;
       if (resource == 'APPLE') {
@@ -227,38 +183,39 @@ export const DataScreen = ({route, navigation}) => {
       } else if (resource == 'SAMSUNG') {
         connection = Connections.SAMSUNG;
       }
-      native_data({
+      nativeData({
         connection: connection,
         setPayloadMethod: setPayload,
-        fromDate: fromDate,
-        toDate: toDate,
+        fromDate: fromDate.current,
+        toDate: toDate.current,
         requestedDataType: requestedDataType,
       });
     } else {
-      api_request_data({
-        setPayloadMethod: setPayload,
+      let data_payload = await getRequestData({
         fromDate: previousFromDate,
         toDate: previousToDate,
         requestedDataType: requestedDataType,
         user_id: user_id,
-        reference_id: reference_id,
-        resource: resource,
       });
+      const health_key = Object.keys(data_payload.data[0]);
+      var result_payload: [string, JSONValue][] = [];
+      health_key.map(key => {
+        var first_element = getLeafElement(data_payload.data[0][key]);
+        if (first_element == null || first_element == undefined) {
+          first_element = 'empty';
+        }
+        result_payload.push([key, first_element]);
+      });
+
+      if (result_payload !== undefined) {
+        setPayload(result_payload);
+      }
     }
   };
   useEffect(() => {
     request();
-  }, [
-    previousFromDate,
-    previousToDate,
-    reference_id,
-    requestedDataType,
-    resource,
-    user_id,
-  ]);
-  var entries: [string, string][] = payload;
+  }, []);
 
-  // @ts-ignore
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#F5F5F5'}}>
       <View>
@@ -281,7 +238,7 @@ export const DataScreen = ({route, navigation}) => {
             style={DataScreenStyle.dateContainer}>
             <Text style={DataScreenStyle.dateText}>From:</Text>
             <Text style={DateScreenStyle.dateText2}>
-              {showDateText(fromDate)}
+              {showDateText(fromDate.current)}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -289,16 +246,16 @@ export const DataScreen = ({route, navigation}) => {
             style={DataScreenStyle.dateContainer}>
             <Text style={DataScreenStyle.dateText}>To:</Text>
             <Text style={DateScreenStyle.dateText2}>
-              {showDateText(toDate)}
+              {showDateText(toDate.current)}
             </Text>
           </TouchableOpacity>
         </View>
         <View style={[DataScreenStyle.mainDataFrame, {alignSelf: 'center'}]}>
-          {entries.map((entry, index) => {
+          {payload.map((entry, index) => {
             if (index <= 10) {
               return (
                 <Row
-                  key={entry}
+                  key={index}
                   style={
                     index % 2 == 0
                       ? DataScreenStyle.whiteRow
@@ -356,12 +313,9 @@ export const DataScreen = ({route, navigation}) => {
             }}>
             <DatePopUp
               testID="dateTimePicker"
-              value={fromDate}
-              mode={'date'}
+              value={fromDate.current}
               is24Hour={true}
-              // @ts-ignore
               onChange={onChangeFromDate}
-              display="spinner"
               onDismiss={() => {
                 setFromShow(false);
               }}
@@ -375,12 +329,9 @@ export const DataScreen = ({route, navigation}) => {
             }}>
             <DatePopUp
               testID="dateTimePicker"
-              value={toDate}
-              mode={'date'}
+              value={toDate.current}
               is24Hour={true}
-              // @ts-ignore
               onChange={onChangeToDate}
-              display="spinner"
               onDismiss={() => {
                 setToShow(false);
               }}

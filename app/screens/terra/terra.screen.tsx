@@ -8,16 +8,8 @@ import {
   Image,
 } from 'react-native';
 import {terraStyle} from './terra.style';
-// @ts-ignore
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-// @ts-ignore
-const AppButton = ({onPress, title, styleButton}) => {
-  return (
-    <TouchableOpacity onPress={onPress} style={styleButton}>
-      <Text style={terraStyle.appButtonText}>{title}</Text>
-    </TouchableOpacity>
-  );
-};
+import {AppButton} from '../../utils.component';
 
 const HeartbeatIcon = (
   <FontAwesome name="heartbeat" size={25} style={terraStyle.icon} />
@@ -67,6 +59,7 @@ export const TerraScreen = () => {
             styleButton={terraStyle.button1}
             onPress={() => Alert.alert('Simple Button pressed')}
             title="Continue"
+            textStyle={terraStyle.appButtonText}
           />
         </View>
       </View>

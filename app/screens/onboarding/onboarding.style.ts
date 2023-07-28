@@ -9,10 +9,13 @@ export const onboardingStyle = StyleSheet.create({
   },
   imageContainer: {
     position: 'relative',
-    width: 300,
-    height: 300,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 200,
+    height: 200,
     // left: 37,
-    top: -110,
+    top: -120,
   },
   // text container one
   textContainer: {

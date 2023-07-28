@@ -3,24 +3,43 @@ import {SafeAreaView, View, Text, TouchableOpacity, Image} from 'react-native';
 import {requestDataScreenStyle} from './requestData.style';
 import {utilsStyle} from '../../utils.style';
 import {Backbutton} from '../../utils.component';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../../app.navigator';
 
 /**
 Renders an icon based on the provided value.
 @param {string} value - The value to determine the icon to display.
 @return {JSX.Element} - The icon component.
  */
-// @ts-ignore
-const ImageIcon = ({value}) => {
+type values =
+  | 'Body'
+  | 'Daily'
+  | 'Activity'
+  | 'Sleep'
+  | 'Menstruation'
+  | 'Nutrition';
+const values: values[] = [
+  'Body',
+  'Daily',
+  'Activity',
+  'Sleep',
+  'Menstruation',
+  'Nutrition',
+];
+interface imageIconProps {
+  type: values;
+}
+const ImageIcon = ({type}: imageIconProps) => {
   var icon =
-    value == 'Body'
+    type == 'Body'
       ? require('../../../assets/requestData/body.png')
-      : value == 'Daily'
+      : type == 'Daily'
       ? require('../../../assets/requestData/daily.png')
-      : value == 'Activity'
+      : type == 'Activity'
       ? require('../../../assets/requestData/activity.png')
-      : value == 'Menstruation'
+      : type == 'Menstruation'
       ? require('../../../assets/requestData/menstruation.png')
-      : value == 'Sleep'
+      : type == 'Sleep'
       ? require('../../../assets/requestData/sleep.png')
       : require('../../../assets/requestData/nuitrition.png');
   return (
@@ -44,16 +63,8 @@ Renders the request data screen.
 @param {Object} props.navigation - The navigation object used for screen navigation.
 @return {JSX.Element} - The request data screen component.
 */
-// @ts-ignore
-export const RequestDataScreen = ({route, navigation}) => {
-  const values: string[] = [
-    'Body',
-    'Daily',
-    'Activity',
-    'Sleep',
-    'Menstruation',
-    'Nutrition',
-  ];
+type Props = NativeStackScreenProps<RootStackParamList, 'RequestData'>;
+export const RequestDataScreen = ({route, navigation}: Props) => {
   const {user_id, resource, reference_id} = route.params;
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -78,7 +89,7 @@ export const RequestDataScreen = ({route, navigation}) => {
                   reference_id: reference_id,
                 })
               }>
-              <ImageIcon value={value} />
+              <ImageIcon type={value} />
               <Text style={requestDataScreenStyle.buttonText}>{value}</Text>
             </TouchableOpacity>
           ))}

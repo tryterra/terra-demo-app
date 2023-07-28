@@ -8,8 +8,33 @@ import {DateScreen} from './screens/date/date.screen';
 import {DataScreen} from './screens/data/data.screen';
 import {OnboardingScreen} from './screens/onboarding/onboarding.screen';
 
+export type RootStackParamList = {
+  Home: undefined;
+  Login: undefined;
+  Onboarding: undefined;
+  RequestData: {
+    user_id: string;
+    reference_id: string;
+    resource: string;
+  };
+  Date: {
+    requestedDataType: string;
+    user_id: string;
+    resource: string;
+    reference_id: string;
+  };
+  Data: {
+    previousFromDate: string;
+    previousToDate: string;
+    requestedDataType: string;
+    user_id: string;
+    resource: string;
+    reference_id: string;
+  };
+};
+
 /// This is a component from the @react-navigation/native-stack library that creates a stack navigator.
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 /// This is the main function that sets up the navigation for the app.
 /// It creates a stack navigator, sets up a linking configuration to handle deep links and redirection from browser back to app,

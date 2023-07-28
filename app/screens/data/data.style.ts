@@ -80,7 +80,7 @@ export const DataScreenStyle = StyleSheet.create({
     padding: 16,
     width: 343,
     height: 53,
-    backgroundColor: '#F5F9FF'
+    backgroundColor: '#F5F9FF',
   },
   whiteRow: {
     flexDirection: 'row',

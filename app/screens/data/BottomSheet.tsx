@@ -1,11 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import {
-  Animated,
-  Dimensions,
-  Modal,
-  PanResponder,
-  View,
-} from 'react-native';
+import {Animated, Dimensions, Modal, PanResponder, View} from 'react-native';
 import {DataScreenStyle} from './data.style';
 
 /// This is a React Native component that renders a modal with a draggable and dismissible popup.

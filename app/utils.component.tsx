@@ -2,16 +2,17 @@ import React from 'react';
 import {
   GestureResponderEvent,
   Image,
+  ImageSourcePropType,
   Text,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 import DateTimePicker, {
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import {DataScreenStyle} from './screens/data/data.style';
 import {utilsStyle} from './utils.style';
-// @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 /// A function that takes a Date object and returns a string that represents the date in the format of "DD MMM YYYY".
@@ -69,8 +70,19 @@ export const DateTimePickerAdvance = (props: {
 /// It takes an onPress function that will be called when the button is pressed, a title string,
 /// a styleButton object of type ViewStyle that will be used to style the button,
 /// and a textStyle object of type TextStyle that will be used to style the text inside the button.
-// @ts-ignore
-export const AppButton = ({onPress, title, styleButton, textStyle}) => {
+interface appButtonProps {
+  onPress: (event: GestureResponderEvent) => void;
+  title: string;
+  styleButton: any;
+  textStyle: any;
+  icon?: ImageSourcePropType;
+}
+export const AppButton = ({
+  onPress,
+  title,
+  styleButton,
+  textStyle,
+}: appButtonProps) => {
   return (
     <TouchableOpacity onPress={onPress} style={styleButton}>
       <Text style={textStyle}>{title}</Text>
@@ -83,8 +95,13 @@ export const AppButton = ({onPress, title, styleButton, textStyle}) => {
 /// a styleButton object of type ViewStyle that will be used to style the button,
 /// a textStyle object of type TextStyle that will be used to style the text inside the button,
 /// and an icon of type ImageSourcePropType that will be used to display the icon.
-// @ts-ignore
-export const AppButtonWithIcon = ({onPress, title, styleButton, textStyle, icon}) => {
+export const AppButtonWithIcon = ({
+  onPress,
+  title,
+  styleButton,
+  textStyle,
+  icon,
+}: appButtonProps) => {
   return (
     <TouchableOpacity onPress={onPress} style={styleButton}>
       <View
@@ -94,14 +111,14 @@ export const AppButtonWithIcon = ({onPress, title, styleButton, textStyle, icon}
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-        <Image source={icon} />
+        {icon && <Image source={icon} />}
         <Text style={textStyle}>{title}</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
-export type JSONValue = string | number | boolean | null | {} | JSONValue[];
+export type JSONValue = string | number | boolean | null | JSONValue[];
 
 /// A function that takes a JSON object and returns the first leaf node of the object.
 export function getLeafElement(jsonObj: JSONValue): JSONValue {
@@ -134,12 +151,10 @@ export var example_entries: [string, string][] = [
 export const DatePopUp = (props: {
   testID: string | undefined;
   value: Date;
-  mode: string | undefined;
   is24Hour: boolean | undefined;
   onChange:
     | ((event: DateTimePickerEvent, date?: Date | undefined) => void)
     | undefined;
-  display: string | undefined;
   onDismiss: ((event: GestureResponderEvent) => void) | undefined;
 }) => {
   return (
@@ -147,12 +162,10 @@ export const DatePopUp = (props: {
       <DateTimePicker
         testID={props.testID}
         value={props.value}
-        // @ts-ignore
-        mode={props.mode}
+        mode={'date'}
         is24Hour={props.is24Hour}
         onChange={props.onChange}
-        // @ts-ignore
-        display={props.display}
+        display={'spinner'}
       />
       <TouchableOpacity
         onPress={props.onDismiss}

@@ -1,8 +1,6 @@
 import React, {useState} from 'react';
 import {SafeAreaView, View, Text} from 'react-native';
 import {DateScreenStyle} from './date.style';
-
-// @ts-ignore
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import BottomSheet from '../data/BottomSheet';
 import {utilsStyle} from '../../utils.style';
@@ -13,14 +11,16 @@ import {
   DateTimePickerAdvance,
   showDateTextLong,
 } from '../../utils.component';
+import {RootStackParamList} from '../../app.navigator';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 /// This is a React functional component that renders a screen for choosing dates for data request.
 /// It receives the necessary route parameters from its parent component.
 /// It uses React hooks to manage state, including the selected dates and whether to show the date pickers.
 /// It also uses various imported components from utils.component to structure and render the screen.
 /// The component also contains logic to handle button presses and navigation to the next screen.
-/// @ts-ignore
-export const DateScreen = ({route, navigation}) => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Date'>;
+export const DateScreen = ({route, navigation}: Props) => {
   const {user_id, resource, reference_id, requestedDataType} = route.params;
   const today = new Date();
   const yesterday = new Date();
